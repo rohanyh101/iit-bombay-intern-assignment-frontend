@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Member Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .actions {
+            margin-bottom: 20px;
+        }
+
+        .actions button {
+            margin-right: 10px;
+            /* padding: 10px 15px; */
+            cursor: pointer;
+        }
+
+        #content {
+            margin-top: 20px;
+            width: 100%;
+            max-width: 600px;
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        li {
+            border: 1px solid #ccc;
+            /* Border around each book */
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            background-color: #f9f9f9;
+        }
+
+        h1 {
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Welcome Member</h1>
+    <div class="actions">
+        <button onclick="fetchAvailableBooks()">Available Books</button>
+        <button onclick="fetchBorrowedBooks()">Borrowed Books</button>
+        <button onclick="borrowBookPrompt()">Borrow Book</button>
+        <button onclick="returnBookPrompt()">Return Book</button>
+        <button onclick="viewBookByIdPrompt()">View Book</button>
+        <button onclick="deleteAccountPrompt()">Delete Account</button>
+    </div>
+
+    <div id="content"></div>
+
+    <script>
+        const baseUrl = "http://localhost:8080"; // Adjust if necessary
+        const token = localStorage.getItem("token");
+
+        // Function to render books in a list format
+        function renderBooks(books) {
+            const contentDiv = document.getElementById("content");
+            contentDiv.innerHTML = ''; // Clear previous content
+            const ul = document.createElement('ul');
+
+            books.forEach(book => {
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    <strong>Title:</strong> ${book.title}<br>
+                    <strong>Author:</strong> ${book.author}<br>
+                    <strong>ISBN:</strong> ${book.isbn}<br>
+                    <strong>Status:</strong> ${book.status}<br>
+                    <strong>Quantity:</strong> ${book.qty}
+                `;
+                ul.appendChild(li);
+            });
+
+            contentDiv.appendChild(ul);
+        }
+
+        // Fetch and display available books
+        async function fetchAvailableBooks() {
+            try {
+                const response = await fetch(`${baseUrl}/member/books`, {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+                if (!response.ok) throw new Error('Network response was not ok');
+                const books = await response.json();
+                renderBooks(books);
+            } catch (error) {
+                console.error('Error fetching available books:', error);
+                document.getElementById("content").innerHTML = '<p>Error fetching available books.</p>';
+            }
+        }
+
+        // Fetch and display borrowed books
+        async function fetchBorrowedBooks() {
+            try {
+                const response = await fetch(`${baseUrl}/member/books/borrowed`, {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+
+                if (!response.ok) throw new Error('Network response was not ok');
+
+                const borrowed = await response.json();
+
+                if (borrowed.length === 0) {
+                    document.getElementById("content").innerHTML = '<p>You have not borrowed any books yet.</p>';
+                } else {
+                    renderBooks(borrowed);
+                }
+            } catch (error) {
+                console.error('Error fetching borrowed books:', error);
+                document.getElementById("content").innerHTML = '<p>Error fetching borrowed books.</p>';
+            }
+        }
+
+        // Prompt to borrow a book
+        function borrowBookPrompt() {
+            const isbn = prompt("Enter the ISBN of the book you want to borrow:");
+            if (isbn) {
+                borrowBook(isbn);
+            }
+        }
+
+        // Borrow a book
+        async function borrowBook(isbn) {
+            try {
+                const response = await fetch(`${baseUrl}/member/books/borrow/${isbn}`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    },
+                });
+                const result = await response.json();
+                alert(result.message || 'Book borrowed successfully!');
+            } catch (error) {
+                console.error('Error borrowing book:', error);
+                alert('Error borrowing book.');
+            }
+        }
+
+        // Prompt to return a book
+        function returnBookPrompt() {
+            const isbn = prompt("Enter the ISBN of the book you want to return:");
+            if (isbn) {
+                returnBook(isbn);
+            }
+        }
+
+        // Return a book
+        async function returnBook(isbn) {
+            try {
+                const response = await fetch(`${baseUrl}/member/books/return/${isbn}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    },
+                });
+
+                const result = await response.json();
+                // console.log(result);
+                alert(result.message || 'Book returned successfully!');
+            } catch (error) {
+                console.error('Error returning book:', error);
+                alert('Error returning book.');
+            }
+        }
+
+        // Prompt to view a book by ID
+        function viewBookByIdPrompt() {
+            const isbn = prompt("Enter the ISBN of the book you want to view:");
+            if (isbn) {
+                viewBookById(isbn);
+            }
+        }
+
+        // View a book by ID
+        async function viewBookById(isbn) {
+            try {
+                const response = await fetch(`${baseUrl}/member/books/${isbn}`, {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+                if (!response.ok) throw new Error('Network response was not ok');
+                const book = await response.json();
+                renderBooks([book]); // Display the book details
+            } catch (error) {
+                console.error('Error fetching book by ISBN:', error);
+                document.getElementById("content").innerHTML = '<p>Error fetching book details.</p>';
+            }
+        }
+
+        // Prompt to delete account
+        function deleteAccountPrompt() {
+            const confirmation = confirm("Are you sure you want to delete your account? This action cannot be undone.");
+            if (confirmation) {
+                deleteAccount();
+            }
+        }
+
+        // Delete account
+        async function deleteAccount() {
+            try {
+                const response = await fetch(`${baseUrl}/member/account`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                });
+                const result = await response.json();
+                alert(result.message || 'Account deleted successfully!');
+                localStorage.removeItem("token"); // Clear token after deletion
+                window.location.reload(); // Reload page after deletion
+            } catch (error) {
+                console.error('Error deleting account:', error);
+                alert('Error deleting account.');
+            }
+        }
+    </script>
+</body>
+
+</html>

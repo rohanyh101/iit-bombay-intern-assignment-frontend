@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Librarian Dashboard</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .actions {
+      margin-bottom: 20px;
+    }
+
+    .actions button {
+      margin-right: 10px;
+      cursor: pointer;
+    }
+
+    #content {
+      margin-top: 20px;
+      width: 100%;
+      max-width: 600px;
+    }
+
+    ul {
+      list-style-type: none;
+      padding: 0;
+    }
+
+    li {
+      border: 1px solid #ccc;
+      padding: 10px;
+      border-radius: 5px;
+      margin-bottom: 10px;
+      background-color: #f9f9f9;
+    }
+
+    h1 {
+      text-align: center;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Librarian Dashboard</h1>
+
+  <div class="actions">
+    <button onclick="fetchBooks()">View All Books</button>
+    <button onclick="fetchUsers()">View All Users</button>
+    <button onclick="viewBook()">View Single Book</button>
+    <button onclick="addUserPrompt()">Add User</button>
+    <button onclick="fetchActiveUsers()">View Active Users</button>
+    <button onclick="fetchDeletedUsers()">View Deleted Users</button>
+    <button onclick="getUserTransactionsPrompt()">View Borrowed Books of User</button>
+
+    <h2>Actions</h2>
+    <button onclick="addBookPrompt()">Add Book</button>
+    <button onclick="updateBookPrompt()">Update Book</button>
+    <button onclick="deleteBookPrompt()">Delete Book</button>
+    <button onclick="viewUserPrompt()">View Single User</button>
+    <button onclick="updateUserPrompt()">Update User</button>
+    <button onclick="deleteUserPrompt()">Delete User</button>
+    <button onclick="forceDeleteUserPrompt()">Force Delete User</button>
+  </div>
+
+  <div id="content"></div>
+
+  <script>
+    const baseUrl = "http://localhost:8080";
+    const token = localStorage.getItem("token");
+
+    function forceDeleteUserPrompt() {
+      alert('Warning: This action is irreversible!');
+      const id = prompt("Enter the ID of the user you want to force delete:");
+      if (id) {
+        forceDeleteUser(id);
+      }
+    }
+
+    async function forceDeleteUser(id) {
+      try {
+        const response = await fetch(`${baseUrl}/librarian/users/${id}/force`, {
+          method: 'DELETE',
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (!response.ok) throw new Error('Network response was not ok');
+
+        const result = await response.json();
+        alert(result.message || 'User force deleted successfully!');
+      } catch (error) {
+        console.error('Error force deleting user:', error);
+        document.getElementById("content").innerHTML = '<p>Error force deleting user.</p>';
+      }
+    }
+
+    function deleteUserPrompt() {
+      const id = prompt("Enter the ID of the user you want to delete:");
+      if (id) {
+        deleteUser(id);
+      }
+    }
+
+    async function deleteUser(id) {
+      try {
+        const response = await fetch(`${baseUrl}/librarian/users/${id}`, {
+          method: 'DELETE',
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (!response.ok) throw new Error('Network response was not ok');
+
+        const result = await response.json();
+        alert(result.message || 'User deleted successfully!');
+      } catch (error) {
+        console.error('Error deleting user:', error);
+        document.getElementById("content").innerHTML = '<p>Error deleting user.</p>';
+      }
+    }
+
+    function updateUserPrompt() {
+      const id = prompt("Enter the ID of the user you want to update:");
+      const username = prompt("Enter the username of the user you want to update:");
+      const role = prompt("Enter the role of the user you want to update (LIBRARIAN / MEMBER):");
+      const isActive = prompt("Enter the status of the user you want to update (true/false):");
+
+      // Convert isActive to a boolean value
+      const isActiveBoolean = isActive.toLowerCase() === 'true';
+
+      if (id && username && role && (isActive === 'true' || isActive === 'false')) {
+        updateUser(id, { username, role, is_active: isActiveBoolean });
+      } else {
+        alert('Invalid input!');
+      }
+    }
+
+
+    async function updateUser(id, user) {
+      try {
+        const response = await fetch(`${baseUrl}/librarian/users/${id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(user),
+        });
+
+        const result = await response.json();
+        console.log(result);
+        alert(result.message || 'User updated successfully!');
+      } catch (error) {
+        console.error('Error updating user:', error);
+        document.getElementById("content").innerHTML = '<p>Error updating user.</p>';
+      }
+    }
+
+    function deleteBookPrompt() {
+      const isbn = prompt("Enter isbn of book you want to delete:");
+      if (isbn) {
+        deleteBook(isbn);
+      }
+    }
+
+    async function deleteBook(isbn) {
+      try {
+        const response = await fetch(`${baseUrl}/librarian/books/${isbn}`, {
+          method: 'DELETE',
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (!response.ok) throw new Error('Network response was not ok');
+
+        const result = await response.json();
+        alert(result.message || 'Book deleted successfully!');
+      } catch (error) {
+        console.error('Error deleting book:', error);
+        document.getElementById("content").innerHTML = '<>Error deleting book.</p>';
+      }
+    }
+
+
+    function updateBookPrompt() {
+      const isbn = prompt("Enter the ISBN of the book you want to update:");
+      const title = prompt("Enter the title of the book you want to update:");
+      const author = prompt("Enter the author of the book you want to update:");
+      const status = prompt("Enter the status of the book you want to update:");
+      const qty = Number(prompt("Enter the quantity of the book you want to update:"));
+      if (title && author && isbn && status && !isNaN(qty)) {
+        updateBook(isbn, { title, author, status, qty });
+      } else {
+        alert('Invalid input!');
+      }
+    }
+
+    async function updateBook(isbn, book) {
+      try {
+        const response = await fetch(`${baseUrl}/librarian/books/${isbn}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(book),
+        });
+
+        const result = await response.json();
+        console.log(result);
+        alert(result.message || 'Book updated successfully!');
+      } catch (error) {
+        console.error('Error updating book:', error);
+      }
+    }
+
+    // Prompt to add a user
+    function addUserPrompt() {
+      const username = prompt("Enter username:");
+      const password = prompt("Enter password:");
+      const role = prompt("Enter role (LIBRARIAN / MEMBER):");
+      if (username && password && role) {
+        addUser({ username, password, role });
+      } else {
+        alert('Invalid input!');
+      }
+    }
+
+    // Add a user
+    async function addUser(user) {
+      try {
+        const response = await fetch(`${baseUrl}/librarian/users`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(user),
+        });
+
+        const result = await response.json();
+        console.log(result);
+        alert(result.message || 'User added successfully!');
+      } catch (error) {
+        console.error('Error adding User:', error);
+      }
+    }
+
+    function viewUserPrompt() {
+      const isbn = prompt("Enter id of the user you want to view:");
+      if (isbn) {
+        viewUserById(isbn);
+      }
+    }
+
+    async function viewUserById(uid) {
+      try {
+        const response = await fetch(`${baseUrl}/librarian/users/${uid}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (!response.ok) throw new Error('Network response was not ok');
+
+        const user = await response.json();
+        renderUsers([user]);
+      } catch (error) {
+        console.error('Error fetching book by userId:', error);
+        document.getElementById("content").innerHTML = '<p>Error fetching user details.</p>';
+      }
+    }
+
+    // Prompt to view a book by ID
+    function viewBook() {
+      const isbn = prompt("Enter the ISBN of the book you want to view:");
+      if (isbn) {
+        viewBookById(isbn);
+      }
+    }
+
+    // View a book by ID
+    async function viewBookById(isbn) {
+      try {
+        const response = await fetch(`${baseUrl}/librarian/books/${isbn}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (!response.ok) throw new Error('Network response was not ok');
+        const book = await response.json();
+        renderBooks([book]);
+      } catch (error) {
+        console.error('Error fetching book by ISBN:', error);
+        document.getElementById("content").innerHTML = '<p>Error fetching book details.</p>';
+      }
+    }
+
+    // Function to render books
+    function renderBooks(books) {
+      const contentDiv = document.getElementById("content");
+      contentDiv.innerHTML = '';
+      const ul = document.createElement('ul');
+      books.forEach(book => {
+        const li = document.createElement('li');
+        li.innerHTML = `
+                    <strong>Title:</strong> ${book.title}<br>
+                    <strong>Author:</strong> ${book.author}<br>
+                    <strong>ISBN:</strong> ${book.isbn}<br>
+                    <strong>Status:</strong> ${book.status}<br>
+                    <strong>Quantity:</strong> ${book.qty}
+                `;
+        ul.appendChild(li);
+      });
+      contentDiv.appendChild(ul);
+    }
+
+    // Function to render users
+    function renderUsers(users) {
+      const contentDiv = document.getElementById("content");
+      contentDiv.innerHTML = ''; // Clear previous content
+      const ul = document.createElement('ul');
+
+      users.forEach(user => {
+        const li = document.createElement('li');
+        li.innerHTML = `
+                <strong>ID:</strong> ${user.id}<br>
+                <strong>Username:</strong> ${user.username}<br>
+                <strong>Role:</strong> ${user.role}<br>
+                <strong>Is Active:</strong> ${user.is_active ? 'Active' : 'Inactive'}
+            `;
+        ul.appendChild(li);
+      });
+
+      contentDiv.appendChild(ul);
+    }
+
+    // Fetch and display all books
+    async function fetchBooks() {
+      try {
+        const response = await fetch(`${baseUrl}/librarian/books`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const books = await response.json();
+        renderBooks(books);
+      } catch (error) {
+        console.error('Error fetching books:', error);
+      }
+    }
+
+    // Prompt to add a book
+    function addBookPrompt() {
+      const title = prompt("Enter book title:");
+      const author = prompt("Enter book author:");
+      const isbn = prompt("Enter book ISBN:");
+      const status = prompt("Enter book status (AVAILABLE/OUT_OF_STOCK):");
+      const qty = Number(prompt("Enter book quantity:"));
+      if (title && author && isbn && !isNaN(qty)) {
+        addBook({ title, author, isbn, qty, status });
+      } else {
+        alert('Invalid input!');
+      }
+    }
+
+    // Add a book
+    async function addBook(book) {
+      try {
+        const response = await fetch(`${baseUrl}/librarian/books`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(book),
+        });
+
+        const result = await response.json();
+        console.log(result);
+        alert(result.message || 'Book added successfully!');
+        fetchBooks();
+      } catch (error) {
+        console.error('Error adding book:', error);
+      }
+    }
+
+    // Fetch all users
+    async function fetchUsers() {
+      try {
+        const response = await fetch(`${baseUrl}/librarian/users`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        const users = await response.json();
+        renderUsers(users);
+      } catch (error) {
+        console.error('Error fetching users:', error);
+      }
+    }
+
+    // Fetch active users
+    async function fetchActiveUsers() {
+      try {
+        const response = await fetch(`${baseUrl}/librarian/users/active`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        const users = await response.json();
+
+        if (users.length === 0) {
+          document.getElementById("content").innerHTML = '<p>No active users found.</p>';
+        } else {
+          renderUsers(users);
+        }
+      } catch (error) {
+        console.error('Error fetching active users:', error);
+      }
+    }
+
+    // Fetch deleted users
+    async function fetchDeletedUsers() {
+      try {
+        const response = await fetch(`${baseUrl}/librarian/users/deleted`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        const users = await response.json();
+        renderUsers(users);
+      } catch (error) {
+        console.error('Error fetching deleted users:', error);
+      }
+    }
+
+    function renderTransction(transactions) {
+      const contentDiv = document.getElementById("content");
+      contentDiv.innerHTML = '';
+      const ul = document.createElement('ul');
+      transactions.forEach(transaction => {
+        const li = document.createElement('li');
+        li.innerHTML = `
+                    <strong>ID:</strong> ${transaction.id}<br>
+                    <strong>UserID:</strong> ${transaction.user_id}<br>
+                    <strong>BookID:</strong> ${transaction.book_id}<br>
+                    <strong>BorrowedAt:</strong> ${transaction.borrowed_at}<br>
+                    <strong>ReturnedAt:</strong> ${transaction.returned_at}<br>
+                    <strong>Status:</strong> ${transaction.status}
+                `;
+        ul.appendChild(li);
+      });
+      contentDiv.appendChild(ul);
+    }
+
+    // Fetch borrowed books of a user
+    function getUserTransactionsPrompt() {
+      const userId = prompt("Enter the user ID:");
+      if (userId) {
+        fetchUserTransactions(userId);
+      }
+    }
+
+    async function fetchUserTransactions(userId) {
+      try {
+        const response = await fetch(`${baseUrl}/librarian/users/${userId}/history`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        const transactions = await response.json();
+
+        if (transactions.length === 0) {
+          document.getElementById("content").innerHTML = '<p>No Transactions found for this user.</p>';
+        } else {
+          renderTransction(transactions);
+        }
+      } catch (error) {
+        console.error('Error fetching user borrowed books:', error);
+      }
+    }
+
+  </script>
+</body>
+
+</html>

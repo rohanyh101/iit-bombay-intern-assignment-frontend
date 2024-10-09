@@ -99,9 +99,9 @@
             localStorage.setItem('token', data.token);
             // Redirect based on role
             if (data.role === 'LIBRARIAN') {
-                window.location.href = '/librarian-dashboard.html';
+                window.location.href = '/iit-bombay-intern-assignment-frontend/librarian-dashboard.html';
             } else {
-                window.location.href = '/member-dashboard.html';
+                window.location.href = '/iit-bombay-intern-assignment-frontend/member-dashboard.html';
             }
         } else {
             alert(data.error || 'Login failed!');

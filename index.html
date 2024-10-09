@@ -7,7 +7,7 @@
     <style>
         body {
             display: flex;
-            flex-direction: column; /* Stack elements vertically */
+            flex-direction: column;
             justify-content: center;
             align-items: center;
             height: 100vh;
@@ -15,12 +15,12 @@
             background-color: #f4f4f4;
         }
         h1 {
-            text-align: center; /* Center the heading */
-            margin-bottom: 20px; /* Space between heading and forms */
+            text-align: center;
+            margin-bottom: 20px;
         }
         .form-container {
             display: flex;
-            gap: 20px; /* Space between forms */
+            gap: 20px;
         }
         .form-box {
             border: 1px solid #ccc;
@@ -79,7 +79,7 @@
 
 <script>
     // API URLs
-    const baseUrl = 'http://localhost:8080'; // Change if needed
+    const baseUrl = 'https://iit-bombay-library-management-system.onrender.com';
 
     // Login Function
     document.getElementById('loginForm').addEventListener('submit', async function(e) {
@@ -96,7 +96,7 @@
         const data = await response.json();
         if (response.ok) {
             alert('Login Successful!');
-            localStorage.setItem('token', data.token); // Store token
+            localStorage.setItem('token', data.token);
             // Redirect based on role
             if (data.role === 'LIBRARIAN') {
                 window.location.href = '/librarian-dashboard.html';

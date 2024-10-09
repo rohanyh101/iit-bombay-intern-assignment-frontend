@@ -1,9 +1,9 @@
-const apiBase = "http://localhost:8080"; // Backend API Base URL
+const apiBase = "https://iit-bombay-library-management-system.onrender.com"; // Backend API Base URL
 
 // Login Function
 document
   .getElementById("loginForm")
-  .addEventListener("submit", async function (event) {
+  .addEventListener("submit", async (event) => {
     event.preventDefault();
     const username = document.getElementById("username").value;
     const password = document.getElementById("password").value;
@@ -27,7 +27,7 @@ document
 // Sign Up Function
 document
   .getElementById("signupForm")
-  .addEventListener("submit", async function (event) {
+  .addEventListener("submit", async (event) => {
     event.preventDefault();
     const newUsername = document.getElementById("newUsername").value;
     const newPassword = document.getElementById("newPassword").value;

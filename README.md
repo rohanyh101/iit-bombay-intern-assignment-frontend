@@ -1,12 +1,15 @@
 # Library Management System - Frontend
 
-This is the frontend for the Library Management System, providing a web-based interface for librarians and members to manage and interact with the system. The interface is built with HTML, CSS, and JavaScript, allowing users to log in, manage books, and borrow/return books based on their roles.
+This is the front end of the Library Management System, providing a web-based interface for librarians and members to manage and interact with the system. The interface is built with HTML, CSS, and JavaScript, allowing users to log in, manage books, and borrow/return books based on their roles.
+
+## NOTE
+**Note:** Backend requests may take longer than usual as the application is hosted on Render, with servers located in Singapore, which could cause latency due to the geographic distance.
 
 ## Features
 
 - **Librarian Dashboard**: Manage books, view inventory, and update book details.
 - **Member Dashboard**: View available books, borrow books, and return borrowed books.
-- **Responsive Design**: The frontend is responsive and adapts to different screen sizes.
+- **Responsive Design**: The front end is responsive and adapts to different screen sizes.
 - **Role-Based Access**: Different interfaces for librarians and members based on login credentials.
 - **JWT Authentication**: Secure access through JWT tokens.
 

@@ -18,7 +18,7 @@ document
     if (response.ok) {
       localStorage.setItem("token", result.token);
       localStorage.setItem("role", result.role);
-      window.location.href = "dashboard.html";
+      // window.location.href = "dashboard.html";
     } else {
       alert(result.error);
     }
@@ -46,6 +46,7 @@ document
     const result = await response.json();
     if (response.ok) {
       alert("Sign up successful! Please login.");
+      // window.location.href = "librarian-dashboard.html";
     } else {
       alert(result.error);
     }

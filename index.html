@@ -124,6 +124,13 @@
         const data = await response.json();
         if (response.ok) {
             alert('Signup Successful!');
+
+            // haven't implemented protected routes yet, this is volunarable..
+            // if (role === 'LIBRARIAN') {
+            //     window.location.href = '/librarian-dashboard.html';
+            // } else {
+            //     window.location.href = '/member-dashboard.html';
+            // }
         } else {
             alert(data.error || 'Signup failed!');
         }

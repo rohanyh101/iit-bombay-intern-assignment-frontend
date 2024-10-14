@@ -45,10 +45,28 @@
     h1 {
       text-align: center;
     }
+
+    .return-button {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background-color: transparent;
+      color: #007bff;
+      border: none;
+      cursor: pointer;
+      font-size: 14px;
+      text-decoration: underline;
+    }
+
+    .return-button:hover {
+      color: #0056b3;
+    }
   </style>
 </head>
 
 <body>
+  <button class="return-button" onclick="window.location.href='index.html'">Return to Main Page</button>
+
   <h1>Librarian Dashboard</h1>
 
   <div class="actions">
@@ -58,7 +76,7 @@
     <button onclick="addUserPrompt()">Add User</button>
     <button onclick="fetchActiveUsers()">View Active Users</button>
     <button onclick="fetchDeletedUsers()">View Deleted Users</button>
-    <button onclick="getUserTransactionsPrompt()">View Borrowed Books of User</button>
+    <button onclick="getUserTransactionsPrompt()">View User Transactions</button>
 
     <h2>Actions</h2>
     <button onclick="addBookPrompt()">Add Book</button>
@@ -91,7 +109,11 @@
           headers: { Authorization: `Bearer ${token}` },
         });
 
-        if (!response.ok) throw new Error('Network response was not ok');
+        if (!response.ok) {
+          const result = await response.json(); // Get the JSON response
+          document.getElementById("content").innerHTML = `<p>${result.error || 'Error occurred'}</p>`;
+          return;
+        }
 
         const result = await response.json();
         alert(result.message || 'User force deleted successfully!');
@@ -100,6 +122,7 @@
         document.getElementById("content").innerHTML = '<p>Error force deleting user.</p>';
       }
     }
+
 
     function deleteUserPrompt() {
       const id = prompt("Enter the ID of the user you want to delete:");
@@ -191,7 +214,7 @@
       const isbn = prompt("Enter the ISBN of the book you want to update:");
       const title = prompt("Enter the title of the book you want to update:");
       const author = prompt("Enter the author of the book you want to update:");
-      const status = prompt("Enter the status of the book you want to update:");
+      const status = prompt("Enter the status of the book you want to update (AVAILABLE/OUT_OF_STOCK):");
       const qty = Number(prompt("Enter the quantity of the book you want to update:"));
       if (title && author && isbn && status && !isNaN(qty)) {
         updateBook(isbn, { title, author, status, qty });

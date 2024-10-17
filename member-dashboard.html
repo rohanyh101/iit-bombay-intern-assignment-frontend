@@ -7,26 +7,60 @@
     <title>Member Dashboard</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Arial', sans-serif;
+            background-color: #eef2f3;
+            color: #333;
             padding: 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
+            margin: 0;
         }
 
-        .actions {
+        header {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             margin-bottom: 20px;
         }
 
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+        }
+
+        .actions {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            padding: 20px;
+            border-radius: 10px;
+            background-color: #ffffff;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
         .actions button {
-            margin-right: 10px;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            background-color: #3498db;
+            color: white;
             cursor: pointer;
+            transition: background-color 0.3s;
+            font-size: 14px;
+        }
+
+        .actions button:hover {
+            background-color: #2980b9;
         }
 
         #content {
             margin-top: 20px;
             width: 100%;
-            max-width: 600px;
+            max-width: 800px;
         }
 
         ul {
@@ -36,55 +70,203 @@
 
         li {
             border: 1px solid #ccc;
-            padding: 10px;
+            padding: 15px;
             border-radius: 5px;
             margin-bottom: 10px;
-            background-color: #f9f9f9;
+            background-color: #fafafa;
+            box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
         }
 
-        h1 {
-            text-align: center;
+        strong {
+            color: #2c3e50;
         }
 
-        .return-button {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            background-color: transparent;
-            color: #007bff;
-            border: none;
+        #user-info {
+            text-align: left;
+        }
+
+        @media (max-width: 600px) {
+            .actions {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgb(0, 0, 0);
+            background-color: rgba(0, 0, 0, 0.4);
+            padding-top: 60px;
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 400px;
+            border-radius: 10px;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
             cursor: pointer;
-            font-size: 14px;
-            text-decoration: underline;
         }
 
-        .return-button:hover {
-            color: #0056b3;
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .form-group input {
+            width: 90%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .cont {
+            display: flex;
+            flex-direction: column;
+            align-items: start;
+            gap: 10px;
+        }
+
+        .logout-button {
+            text-align: left;
+            width: 70%;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            background-color: red;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            font-size: 14px;
+        }
+
+        .logout-button:hover {
+            background-color: #b50000;
+        }
+
+        .form-submit-button {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            background-color: #3498db;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            font-size: 14px;
         }
     </style>
 </head>
 
 <body>
-
-    <button class="return-button" onclick="window.location.href='index.html'">Return to Main Page</button>
+    <header>
+        <div class="cont">
+            <div id="user-info">
+                <strong id="username-display">Name: <span id="username"></span></strong><br>
+                <strong id="role-display">Role: <span id="role"></span></strong>
+            </div>
+            <button class="logout-button" onclick="logout()">Logout</button>
+        </div>
+    </header>
 
     <h1>Welcome Member</h1>
     <div class="actions">
         <button onclick="fetchAvailableBooks()">Available Books</button>
         <button onclick="fetchBorrowedBooks()">Borrowed Books</button>
-        <button onclick="borrowBookPrompt()">Borrow Book</button>
-        <button onclick="returnBookPrompt()">Return Book</button>
-        <button onclick="viewBookByIdPrompt()">View Book</button>
+        <button onclick="openModal('borrowBook')">Borrow Book</button>
+        <button onclick="openModal('returnBook')">Return Book</button>
+        <button onclick="openModal('viewBook')">View Book</button>
         <button onclick="deleteAccountPrompt()">Delete Account</button>
     </div>
 
     <div id="content"></div>
 
+    <div id="borrowBookModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('borrowBookModal')">&times;</span>
+            <h2>Borrow Book</h2>
+            <div class="form-group">
+                <label for="borrow-isbn">Enter ISBN:</label>
+                <input type="text" id="borrow-isbn" placeholder="Enter the ISBN of the book" />
+            </div>
+            <button class="form-submit-button" onclick="borrowBook()">Borrow</button>
+        </div>
+    </div>
+
+    <div id="returnBookModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('returnBookModal')">&times;</span>
+            <h2>Return Book</h2>
+            <div class="form-group">
+                <label for="return-isbn">Enter ISBN:</label>
+                <input type="text" id="return-isbn" placeholder="Enter the ISBN of the book" />
+            </div>
+            <button class="form-submit-button" onclick="returnBook()">Return</button>
+        </div>
+    </div>
+
+    <div id="viewBookModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('viewBookModal')">&times;</span>
+            <h2>View Book</h2>
+            <div class="form-group">
+                <label for="view-isbn">Enter ISBN:</label>
+                <input type="text" id="view-isbn" placeholder="Enter the ISBN of the book" />
+            </div>
+            <button class="form-submit-button" onclick="viewBookById()">View</button>
+        </div>
+    </div>
+
     <script>
         const baseUrl = "https://iit-bombay-library-management-system.onrender.com";
         const token = localStorage.getItem("token");
 
-        // Function to render books in a list format
+        (async () => {
+            try {
+                const response = await fetch(`${baseUrl}/api/v1/whoami`, {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+
+                if (!response.ok) throw new Error('Network response was not ok');
+
+                const result = await response.json();
+                document.getElementById('username').innerText = result.username;
+                document.getElementById('role').innerText = result.role;
+                // console.log(result);
+            } catch (error) {
+                console.error('Error fetching user details:', error);
+                document.getElementById("content").innerHTML = '<p>Error fetching user details.</p>';
+            }
+        })();
+
+        fetchAvailableBooks();
+
         function renderBooks(books) {
             const contentDiv = document.getElementById("content");
             contentDiv.innerHTML = ''; // Clear previous content
@@ -97,15 +279,13 @@
                     <strong>Author:</strong> ${book.author}<br>
                     <strong>ISBN:</strong> ${book.isbn}<br>
                     <strong>Status:</strong> ${book.status}<br>
-                    <strong>Quantity:</strong> ${book.qty}
-                `;
+                    `;
                 ul.appendChild(li);
             });
 
             contentDiv.appendChild(ul);
         }
 
-        // Fetch and display available books
         async function fetchAvailableBooks() {
             try {
                 const response = await fetch(`${baseUrl}/member/books`, {
@@ -120,17 +300,14 @@
             }
         }
 
-        // Fetch and display borrowed books
         async function fetchBorrowedBooks() {
             try {
                 const response = await fetch(`${baseUrl}/member/books/borrowed`, {
                     headers: { Authorization: `Bearer ${token}` },
                 });
-
                 if (!response.ok) throw new Error('Network response was not ok');
 
                 const borrowed = await response.json();
-
                 if (borrowed.length === 0) {
                     document.getElementById("content").innerHTML = '<p>You have not borrowed any books yet.</p>';
                 } else {
@@ -142,16 +319,24 @@
             }
         }
 
-        // Prompt to borrow a book
-        function borrowBookPrompt() {
-            const isbn = prompt("Enter the ISBN of the book you want to borrow:");
-            if (isbn) {
-                borrowBook(isbn);
+        function openModal(action) {
+            if (action === 'borrowBook') {
+                document.getElementById('borrowBookModal').style.display = 'block';
+            } else if (action === 'returnBook') {
+                document.getElementById('returnBookModal').style.display = 'block';
+            } else if (action === 'viewBook') {
+                document.getElementById('viewBookModal').style.display = 'block';
             }
         }
 
-        // Borrow a book
-        async function borrowBook(isbn) {
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        async function borrowBook() {
+            const isbn = document.getElementById('borrow-isbn').value;
+            if (!isbn) return alert('Please enter an ISBN.');
+
             try {
                 const response = await fetch(`${baseUrl}/member/books/borrow/${isbn}`, {
                     method: 'POST',
@@ -161,22 +346,18 @@
                 });
                 const result = await response.json();
                 alert(result.message || 'Book borrowed successfully!');
+                closeModal('borrowBookModal');
+                fetchBorrowedBooks();
             } catch (error) {
                 console.error('Error borrowing book:', error);
                 alert('Error borrowing book.');
             }
         }
 
-        // Prompt to return a book
-        function returnBookPrompt() {
-            const isbn = prompt("Enter the ISBN of the book you want to return:");
-            if (isbn) {
-                returnBook(isbn);
-            }
-        }
+        async function returnBook() {
+            const isbn = document.getElementById('return-isbn').value;
+            if (!isbn) return alert('Please enter an ISBN.');
 
-        // Return a book
-        async function returnBook(isbn) {
             try {
                 const response = await fetch(`${baseUrl}/member/books/return/${isbn}`, {
                     method: 'PUT',
@@ -184,26 +365,19 @@
                         'Authorization': `Bearer ${token}`
                     },
                 });
-
                 const result = await response.json();
-                // console.log(result);
                 alert(result.message || 'Book returned successfully!');
+                closeModal('returnBookModal');
             } catch (error) {
                 console.error('Error returning book:', error);
                 alert('Error returning book.');
             }
         }
 
-        // Prompt to view a book by ID
-        function viewBookByIdPrompt() {
-            const isbn = prompt("Enter the ISBN of the book you want to view:");
-            if (isbn) {
-                viewBookById(isbn);
-            }
-        }
+        async function viewBookById() {
+            const isbn = document.getElementById('view-isbn').value;
+            if (!isbn) return alert('Please enter an ISBN.');
 
-        // View a book by ID
-        async function viewBookById(isbn) {
             try {
                 const response = await fetch(`${baseUrl}/member/books/${isbn}`, {
                     headers: { Authorization: `Bearer ${token}` },
@@ -211,13 +385,13 @@
                 if (!response.ok) throw new Error('Network response was not ok');
                 const book = await response.json();
                 renderBooks([book]); // Display the book details
+                closeModal('viewBookModal');
             } catch (error) {
                 console.error('Error fetching book by ISBN:', error);
                 document.getElementById("content").innerHTML = '<p>Error fetching book details.</p>';
             }
         }
 
-        // Prompt to delete account
         function deleteAccountPrompt() {
             const confirmation = confirm("Are you sure you want to delete your account? This action cannot be undone.");
             if (confirmation) {
@@ -225,7 +399,6 @@
             }
         }
 
-        // Delete account
         async function deleteAccount() {
             try {
                 const response = await fetch(`${baseUrl}/member/account`, {
@@ -236,22 +409,22 @@
                     },
                 });
                 const result = await response.json();
-
                 if (result.error) {
                     alert(result.error);
                     return;
                 }
-
                 alert(result.message || 'Account deleted successfully!');
-                localStorage.removeItem("token");
-                window.location.reload();
-
-                // redirect to login page
-                window.location.href = 'index.html';
             } catch (error) {
                 console.error('Error deleting account:', error);
                 alert('Error deleting account.');
             }
+        }
+
+        function logout() {
+            localStorage.removeItem("token");
+            localStorage.removeItem("username");
+            localStorage.removeItem("role");
+            window.location.href = '/iit-bombay-intern-assignment-frontend/index.html'; // Redirect to the signup page
         }
     </script>
 </body>

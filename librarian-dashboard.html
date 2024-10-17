@@ -7,26 +7,60 @@
   <title>Librarian Dashboard</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
+      font-family: 'Arial', sans-serif;
+      background-color: #eef2f3;
+      color: #333;
       padding: 20px;
       display: flex;
       flex-direction: column;
       align-items: center;
+      margin: 0;
     }
 
-    .actions {
+    header {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
       margin-bottom: 20px;
     }
 
+    h1 {
+      text-align: center;
+      color: #2c3e50;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 20px;
+      padding: 20px;
+      border-radius: 10px;
+      background-color: #ffffff;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
     .actions button {
-      margin-right: 10px;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 5px;
+      background-color: #3498db;
+      color: white;
       cursor: pointer;
+      transition: background-color 0.3s;
+      font-size: 14px;
+    }
+
+    .actions button:hover {
+      background-color: #2980b9;
     }
 
     #content {
       margin-top: 20px;
       width: 100%;
-      max-width: 600px;
+      max-width: 800px;
     }
 
     ul {
@@ -36,75 +70,453 @@
 
     li {
       border: 1px solid #ccc;
-      padding: 10px;
+      padding: 15px;
       border-radius: 5px;
       margin-bottom: 10px;
-      background-color: #f9f9f9;
+      background-color: #fafafa;
+      box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
     }
 
-    h1 {
-      text-align: center;
+    strong {
+      color: #2c3e50;
     }
 
-    .return-button {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      background-color: transparent;
-      color: #007bff;
-      border: none;
+    #user-info {
+      text-align: left;
+    }
+
+    @media (max-width: 600px) {
+      .actions {
+        flex-direction: column;
+        align-items: center;
+      }
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgb(0, 0, 0);
+      background-color: rgba(0, 0, 0, 0.4);
+      padding-top: 60px;
+    }
+
+    .modal-content {
+      background-color: #fefefe;
+      margin: 5% auto;
+      padding: 20px;
+      border: 1px solid #888;
+      width: 80%;
+      max-width: 400px;
+      border-radius: 10px;
+    }
+
+    .close {
+      color: #aaa;
+      float: right;
+      font-size: 28px;
+      font-weight: bold;
+    }
+
+    .close:hover,
+    .close:focus {
+      color: black;
+      text-decoration: none;
       cursor: pointer;
-      font-size: 14px;
-      text-decoration: underline;
     }
 
-    .return-button:hover {
-      color: #0056b3;
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    .form-group input {
+      width: 90%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    .cont {
+      display: flex;
+      flex-direction: column;
+      align-items: start;
+      gap: 10px;
+    }
+
+    .logout-button {
+      text-align: left;
+      width: 70%;
+      padding: 10px;
+      border: none;
+      border-radius: 5px;
+      background-color: red;
+      color: white;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      font-size: 14px;
+    }
+
+    .logout-button:hover {
+      background-color: #a30000;
+    }
+
+    select {
+      width: 90%;
+      margin-bottom: 10px;
+      padding: 10px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+    }
+
+    .form-submit-button {
+      width: 100%;
+      padding: 10px;
+      border: none;
+      border-radius: 5px;
+      background-color: #3498db;
+      color: white;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      font-size: 14px;
     }
   </style>
 </head>
 
 <body>
-  <button class="return-button" onclick="window.location.href='index.html'">Return to Main Page</button>
+  <header>
+    <div class="cont">
+      <div id="user-info">
+        <strong id="username-display">Name: <span id="username"></span></strong><br>
+        <strong id="role-display">Role: <span id="role"></span></strong>
+      </div>
+      <button class="logout-button" onclick="logout()">Logout</button>
+    </div>
+  </header>
 
   <h1>Librarian Dashboard</h1>
 
   <div class="actions">
     <button onclick="fetchBooks()">View All Books</button>
     <button onclick="fetchUsers()">View All Users</button>
-    <button onclick="viewBook()">View Single Book</button>
-    <button onclick="addUserPrompt()">Add User</button>
+    <button onclick="openModal('viewBook')">View Single Book</button>
+    <button onclick="openModal('addUser')">Add User</button>
     <button onclick="fetchActiveUsers()">View Active Users</button>
     <button onclick="fetchDeletedUsers()">View Deleted Users</button>
-    <button onclick="getUserTransactionsPrompt()">View User Transactions</button>
-
-    <h2>Actions</h2>
-    <button onclick="addBookPrompt()">Add Book</button>
-    <button onclick="updateBookPrompt()">Update Book</button>
-    <button onclick="deleteBookPrompt()">Delete Book</button>
-    <button onclick="viewUserPrompt()">View Single User</button>
-    <button onclick="updateUserPrompt()">Update User</button>
-    <button onclick="deleteUserPrompt()">Delete User</button>
-    <button onclick="forceDeleteUserPrompt()">Force Delete User</button>
+    <button onclick="openModal('userTransactions')">View User Transactions</button>
+    <button onclick="openModal('addBook')">Add Book</button>
+    <button onclick="openModal('updateBook')">Update Book</button>
+    <button onclick="openModal('deleteBook')">Delete Book</button>
+    <button onclick="openModal('viewUser')">View Single User</button>
+    <button onclick="openModal('updateUser')">Update User</button>
+    <button onclick="openModal('deleteUser')">Delete User</button>
+    <button class="forceDeleteBtn" onclick="openModal('forceDeleteUser')">Force Delete User</button>
   </div>
+
 
   <div id="content"></div>
 
+  <div id="viewBookModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal('viewBookModal')">&times;</span>
+      <h2>View Single Book</h2>
+
+      <div class="form-group">
+        <label for="view-isbn">Enter ISBN:</label>
+        <input type="text" id="view-isbn" placeholder="Enter the ISBN of the book" />
+      </div>
+
+      <button class="form-submit-button" onclick="viewBookById()">View</button>
+    </div>
+  </div>
+
+  <div id="addUserModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal('addUserModal')">&times;</span>
+
+      <h2>Add User</h2>
+      <div class="form-group">
+        <label for="add-username">Username:</label>
+        <input type="text" id="add-username" placeholder="Enter username" />
+      </div>
+
+      <div class="form-group">
+        <label for="add-password">Password:</label>
+        <input type="password" id="add-password" placeholder="Enter Password" />
+      </div>
+
+      <div class="form-group">
+        <label for="add-role">Role:</label>
+        <select id="add-role">
+          <option value="LIBRARIAN">Librarian</option>
+          <option value="MEMBER">Member</option>
+        </select>
+      </div>
+
+      <button class="form-submit-button" onclick="addUser()">Add User</button>
+    </div>
+  </div>
+
+  <div id="userTransactionsModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal('userTransactionsModal')">&times;</span>
+      <h2>View User Transactions</h2>
+
+      <div class="form-group">
+        <label for="transaction-user-id">Enter User ID:</label>
+        <input type="text" id="transaction-user-id" placeholder="Enter user ID" />
+      </div>
+
+      <button class="form-submit-button" onclick="fetchUserTransactions()">View Transactions</button>
+    </div>
+  </div>
+
+  <div id="addBookModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal('addBookModal')">&times;</span>
+      <h2>Add Book</h2>
+
+      <div class="form-group">
+        <label for="add-book-title">Book Title:</label>
+        <input type="text" id="add-book-title" placeholder="Enter book title" />
+      </div>
+      
+      <div class="form-group">
+        <label for="add-book-author">Author:</label>
+        <input type="text" id="add-book-author" placeholder="Enter author name" />
+      </div>
+
+      <div class="form-group">
+        <label for="add-book-isbn">ISBN:</label>
+        <input type="text" id="add-book-isbn" placeholder="Enter ISBN" />
+      </div>
+
+      <div class="form-group">
+        <label for="add-book-qty">Quantity:</label>
+        <input type="number" id="add-book-qty" placeholder="Enter quantity" />
+      </div>
+      
+      <div class="form-group">
+        <label for="add-book-status">Status:</label>
+        <select id="add-book-status">
+          <option value="AVAILABLE">Available</option>
+          <option value="OUT_OF_STOCK">Out of Stock</option>
+        </select>
+      </div>
+      
+      <button class="form-submit-button" onclick="addBook()">Add Book</button>
+    </div>
+  </div>
+
+  <div id="updateBookModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal('updateBookModal')">&times;</span>
+      <h2>Update Book</h2>
+
+      <div class="form-group">
+        <label for="update-book-isbn">Enter ISBN:</label>
+        <input type="text" id="update-book-isbn" placeholder="Enter the ISBN of the book" />
+      </div>
+      
+      <div class="form-group">
+        <label for="update-book-title">New Book Title:</label>
+        <input type="text" id="update-book-title" placeholder="Enter new book title" />
+      </div>
+      
+      <div class="form-group">
+        <label for="update-book-author">New Book Author:</label>
+        <input type="text" id="update-book-author" placeholder="Enter new book author" />
+      </div>
+
+      <div class="form-group">
+        <label for="update-book-qty">New Book Quantity</label>
+        <input type="number" id="update-book-qty" placeholder="Enter new book quantity" />
+      </div>
+
+      <div class="form-group">
+        <label for="update-book-status">Status:</label>
+        <select id="update-book-status">
+          <option value="AVAILABLE">Available</option>
+          <option value="OUT_OF_STOCK">Out of Stock</option>
+        </select>
+      </div>
+      
+      <button class="form-submit-button" onclick="updateBook()">Update Book</button>
+    </div>
+  </div>
+
+  <div id="deleteBookModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal('deleteBookModal')">&times;</span>
+      <h2>Delete Book</h2>
+
+      <div class="form-group">
+        <label for="delete-isbn">Enter ISBN:</label>
+        <input type="text" id="delete-isbn" placeholder="Enter the ISBN of the book" />
+      </div>
+      
+      <button class="form-submit-button" onclick="deleteBook()">Delete Book</button>
+    </div>
+  </div>
+
+  <div id="viewUserModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal('viewUserModal')">&times;</span>
+      <h2>View Single User</h2>
+      
+      <div class="form-group">
+        <label for="view-user-id">Enter User ID:</label>
+        <input type="text" id="view-user-id" placeholder="Enter user ID" />
+      </div>
+      
+      <button class="form-submit-button" onclick="viewUserById()">View User</button>
+    </div>
+  </div>
+
+  <div id="updateUserModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal('updateUserModal')">&times;</span>
+      <h2>Update User</h2>
+      
+      <div class="form-group">
+        <label for="update-user-id">Enter User ID:</label>
+        <input type="text" id="update-user-id" placeholder="Enter user ID" />
+      </div>
+
+      <div class="form-group">
+        <label for="update-username">New Username:</label>
+        <input type="text" id="update-username" placeholder="Enter new username" />
+      </div>
+      
+      <div class="form-group">
+        <label for="update-password">New Password:</label>
+        <input type="password" id="update-password" placeholder="Enter new email" />
+      </div>
+
+      <div class="form-group">
+        <label for="update-role">Role:</label>
+        <select id="update-role">
+          <option value="LIBRARIAN">Librarian</option>
+          <option value="MEMBER">Member</option>
+        </select>
+      </div>
+      
+      <div class="form-group">
+        <label for="update-is-active">Is Active:</label>
+        <select id="update-is-active">
+          <option value="true">True</option>
+          <option value="false">False</option>
+        </select>
+      </div>
+
+      <button class="form-submit-button" onclick="updateUser()">Update User</button>
+    </div>
+  </div>
+
+  <div id="deleteUserModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal('deleteUserModal')">&times;</span>
+      <h2>Delete User</h2>
+      
+      <div class="form-group">
+        <label for="delete-user-id">Enter User ID:</label>
+        <input type="text" id="delete-user-id" placeholder="Enter user ID" />
+      </div>
+      
+      <button class="form-submit-button" onclick="deleteUser()">Delete User</button>
+    </div>
+  </div>
+
+  <div id="forceDeleteUserModal" class="modal">    
+    <div class="modal-content">
+      <span class="close" onclick="closeModal('forceDeleteUserModal')">&times;</span>
+      <h2>Force Delete User</h2>
+      
+      <div class="form-group">
+        <label for="force-delete-user-id">Enter User ID:</label>
+        <input type="text" id="force-delete-user-id" placeholder="Enter user ID" />
+      </div>
+
+      <div class="form-group">
+        <p style="color: red;">This operation is irreversible. Proceed with caution.</p>
+      </div>
+      
+      <button class="form-submit-button" onclick="forceDeleteUser()">Force Delete User</button>
+    </div>
+  </div>
+
+
   <script>
-    const baseUrl = "https://iit-bombay-library-management-system.onrender.com";
+    const baseUrl = 'https://iit-bombay-library-management-system.onrender.com';
     const token = localStorage.getItem("token");
 
-    function forceDeleteUserPrompt() {
-      alert('Warning: This action is irreversible!');
-      const id = prompt("Enter the ID of the user you want to force delete:");
-      if (id) {
-        forceDeleteUser(id);
+    (async () => {
+      try {
+        const response = await fetch(`${baseUrl}/api/v1/whoami`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (!response.ok) throw new Error('Network response was not ok');
+
+        const result = await response.json();
+        document.getElementById('username').innerText = result.username;
+        document.getElementById('role').innerText = result.role;
+        // console.log(result);
+      } catch (error) {
+        console.error('Error fetching user details:', error);
+        document.getElementById("content").innerHTML = '<p>Error fetching user details.</p>';
+      }
+    })();
+
+    fetchUsers();
+
+    function openModal(action) {
+      if (action === 'borrowBook') {
+        document.getElementById('borrowBookModal').style.display = 'block';
+      } else if (action === 'returnBook') {
+        document.getElementById('returnBookModal').style.display = 'block';
+      } else if (action === 'viewBook') {
+        document.getElementById('viewBookModal').style.display = 'block';
+      } else if (action === 'addUser') {
+        document.getElementById('addUserModal').style.display = 'block';
+      } else if (action === 'userTransactions') {
+        document.getElementById('userTransactionsModal').style.display = 'block';
+      } else if (action === 'addBook') {
+        document.getElementById('addBookModal').style.display = 'block';
+      } else if (action === 'updateBook') {
+        document.getElementById('updateBookModal').style.display = 'block';
+      } else if (action === 'deleteBook') {
+        document.getElementById('deleteBookModal').style.display = 'block';
+      } else if (action === 'viewUser') {
+        document.getElementById('viewUserModal').style.display = 'block';
+      } else if (action === 'updateUser') {
+        document.getElementById('updateUserModal').style.display = 'block';
+      } else if (action === 'deleteUser') {
+        document.getElementById('deleteUserModal').style.display = 'block';
+      } else if (action === 'forceDeleteUser') {
+        document.getElementById('forceDeleteUserModal').style.display = 'block';
       }
     }
 
-    async function forceDeleteUser(id) {
+    function closeModal(modalId) {
+      document.getElementById(modalId).style.display = 'none';
+    }
+
+    async function forceDeleteUser() {
+      userId = document.getElementById('force-delete-user-id').value;
+      if (!userId) return alert('Please enter a User ID.');
+
       try {
-        const response = await fetch(`${baseUrl}/librarian/users/${id}/force`, {
+        const response = await fetch(`${baseUrl}/librarian/users/${userId}/force`, {
           method: 'DELETE',
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -117,6 +529,8 @@
 
         const result = await response.json();
         alert(result.message || 'User force deleted successfully!');
+        closeModal('forceDeleteUserModal');
+        fetchUsers();
       } catch (error) {
         console.error('Error force deleting user:', error);
         document.getElementById("content").innerHTML = '<p>Error force deleting user.</p>';
@@ -124,16 +538,12 @@
     }
 
 
-    function deleteUserPrompt() {
-      const id = prompt("Enter the ID of the user you want to delete:");
-      if (id) {
-        deleteUser(id);
-      }
-    }
+    async function deleteUser() {
+      userId = document.getElementById('delete-user-id').value;
+      if (!userId) return alert('Please enter a User ID.');
 
-    async function deleteUser(id) {
       try {
-        const response = await fetch(`${baseUrl}/librarian/users/${id}`, {
+        const response = await fetch(`${baseUrl}/librarian/users/${userId}`, {
           method: 'DELETE',
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -142,32 +552,32 @@
 
         const result = await response.json();
         alert(result.message || 'User deleted successfully!');
+        closeModal('deleteUserModal');
+        fetchUsers();
       } catch (error) {
         console.error('Error deleting user:', error);
         document.getElementById("content").innerHTML = '<p>Error deleting user.</p>';
       }
     }
 
-    function updateUserPrompt() {
-      const id = prompt("Enter the ID of the user you want to update:");
-      const username = prompt("Enter the username of the user you want to update:");
-      const role = prompt("Enter the role of the user you want to update (LIBRARIAN / MEMBER):");
-      const isActive = prompt("Enter the status of the user you want to update (true/false):");
+    async function updateUser() {
+      userId = document.getElementById('update-user-id').value;
+      if (!userId) return alert('Please enter a User ID.');
 
-      // Convert isActive to a boolean value
-      const isActiveBoolean = isActive.toLowerCase() === 'true';
+      const username = document.getElementById('update-username').value;
+      if (!username) return alert('Please enter a Username');
 
-      if (id && username && role && (isActive === 'true' || isActive === 'false')) {
-        updateUser(id, { username, role, is_active: isActiveBoolean });
-      } else {
-        alert('Invalid input!');
-      }
-    }
+      const password = document.getElementById('update-password').value;
+      if (!password) return alert('Please enter a Password');
 
+      const role = document.getElementById('update-role').value;
 
-    async function updateUser(id, user) {
+      const isActive = document.getElementById('update-is-active').value; 
+      
+      user = { username, password, role, is_active: isActive === 'true' };
+
       try {
-        const response = await fetch(`${baseUrl}/librarian/users/${id}`, {
+        const response = await fetch(`${baseUrl}/librarian/users/${userId}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
@@ -177,22 +587,19 @@
         });
 
         const result = await response.json();
-        console.log(result);
+        closeModal('updateUserModal');
         alert(result.message || 'User updated successfully!');
+        fetchUsers();
       } catch (error) {
         console.error('Error updating user:', error);
         document.getElementById("content").innerHTML = '<p>Error updating user.</p>';
       }
     }
 
-    function deleteBookPrompt() {
-      const isbn = prompt("Enter isbn of book you want to delete:");
-      if (isbn) {
-        deleteBook(isbn);
-      }
-    }
+    async function deleteBook() {
+      isbn = document.getElementById('delete-isbn').value;
+      if (!isbn) return alert('Please enter an ISBN.');
 
-    async function deleteBook(isbn) {
       try {
         const response = await fetch(`${baseUrl}/librarian/books/${isbn}`, {
           method: 'DELETE',
@@ -203,27 +610,32 @@
 
         const result = await response.json();
         alert(result.message || 'Book deleted successfully!');
+        closeModal('deleteBookModal');
+        fetchBooks();
       } catch (error) {
         console.error('Error deleting book:', error);
         document.getElementById("content").innerHTML = '<>Error deleting book.</p>';
       }
     }
 
+    async function updateBook() {
+      isbn = document.getElementById('update-book-isbn').value;
+      if (!isbn) return alert('Please enter an ISBN.');
 
-    function updateBookPrompt() {
-      const isbn = prompt("Enter the ISBN of the book you want to update:");
-      const title = prompt("Enter the title of the book you want to update:");
-      const author = prompt("Enter the author of the book you want to update:");
-      const status = prompt("Enter the status of the book you want to update (AVAILABLE/OUT_OF_STOCK):");
-      const qty = Number(prompt("Enter the quantity of the book you want to update:"));
-      if (title && author && isbn && status && !isNaN(qty)) {
-        updateBook(isbn, { title, author, status, qty });
-      } else {
-        alert('Invalid input!');
-      }
-    }
+      const title = document.getElementById('update-book-title').value;
+      if (!title) return alert('Please enter a Title');
 
-    async function updateBook(isbn, book) {
+      const author = document.getElementById('update-book-author').value;
+      if (!author) return alert('Please enter an Author');
+
+      let qty = document.getElementById('update-book-qty').value;
+      if (!qty) return alert('Please enter a Quantity');
+      qty = parseInt(qty);
+
+      const status = document.getElementById('update-book-status').value;
+
+      book = { title, author, status, qty }
+
       try {
         const response = await fetch(`${baseUrl}/librarian/books/${isbn}`, {
           method: 'PUT',
@@ -235,27 +647,33 @@
         });
 
         const result = await response.json();
+        closeModal('updateBookModal');
         console.log(result);
+
+        if (!response.ok) {
+          document.getElementById("content").innerHTML = `<p>${result.error || 'Error occurred'}</p>`;
+          return;
+        }
+
         alert(result.message || 'Book updated successfully!');
+        fetchBooks();
       } catch (error) {
         console.error('Error updating book:', error);
       }
     }
 
-    // Prompt to add a user
-    function addUserPrompt() {
-      const username = prompt("Enter username:");
-      const password = prompt("Enter password:");
-      const role = prompt("Enter role (LIBRARIAN / MEMBER):");
-      if (username && password && role) {
-        addUser({ username, password, role });
-      } else {
-        alert('Invalid input!');
-      }
-    }
-
     // Add a user
     async function addUser(user) {
+      const username = document.getElementById('add-username').value;
+      if (!username) return alert('Please enter an Username');
+
+      const password = document.getElementById('add-password').value;
+      if (!password) return alert('Please enter a Password');
+
+      const role = document.getElementById('add-role').value;
+
+      user = { username, password, role };
+
       try {
         const response = await fetch(`${baseUrl}/librarian/users`, {
           method: 'POST',
@@ -268,22 +686,20 @@
 
         const result = await response.json();
         console.log(result);
+        closeModal('addUserModal');
+        fetchUsers();
         alert(result.message || 'User added successfully!');
       } catch (error) {
         console.error('Error adding User:', error);
       }
     }
 
-    function viewUserPrompt() {
-      const isbn = prompt("Enter id of the user you want to view:");
-      if (isbn) {
-        viewUserById(isbn);
-      }
-    }
+    async function viewUserById() {
+      userId = document.getElementById('view-user-id').value;
+      if (!userId) return alert('Please enter a User ID.');
 
-    async function viewUserById(uid) {
       try {
-        const response = await fetch(`${baseUrl}/librarian/users/${uid}`, {
+        const response = await fetch(`${baseUrl}/librarian/users/${userId}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
 
@@ -291,22 +707,18 @@
 
         const user = await response.json();
         renderUsers([user]);
+        closeModal('viewUserModal');
       } catch (error) {
         console.error('Error fetching book by userId:', error);
         document.getElementById("content").innerHTML = '<p>Error fetching user details.</p>';
       }
     }
 
-    // Prompt to view a book by ID
-    function viewBook() {
-      const isbn = prompt("Enter the ISBN of the book you want to view:");
-      if (isbn) {
-        viewBookById(isbn);
-      }
-    }
-
     // View a book by ID
-    async function viewBookById(isbn) {
+    async function viewBookById() {
+      isbn = document.getElementById('view-isbn').value;
+      if (!isbn) return alert('Please enter an ISBN.');
+
       try {
         const response = await fetch(`${baseUrl}/librarian/books/${isbn}`, {
           headers: { Authorization: `Bearer ${token}` },
@@ -315,6 +727,7 @@
         if (!response.ok) throw new Error('Network response was not ok');
         const book = await response.json();
         renderBooks([book]);
+        closeModal('viewBookModal');
       } catch (error) {
         console.error('Error fetching book by ISBN:', error);
         document.getElementById("content").innerHTML = '<p>Error fetching book details.</p>';
@@ -373,22 +786,25 @@
       }
     }
 
-    // Prompt to add a book
-    function addBookPrompt() {
-      const title = prompt("Enter book title:");
-      const author = prompt("Enter book author:");
-      const isbn = prompt("Enter book ISBN:");
-      const status = prompt("Enter book status (AVAILABLE/OUT_OF_STOCK):");
-      const qty = Number(prompt("Enter book quantity:"));
-      if (title && author && isbn && !isNaN(qty)) {
-        addBook({ title, author, isbn, qty, status });
-      } else {
-        alert('Invalid input!');
-      }
-    }
-
     // Add a book
-    async function addBook(book) {
+    async function addBook() {
+      const title = document.getElementById('add-book-title').value;
+      if (!title) return alert('Please enter a Title');
+
+      const author = document.getElementById('add-book-author').value;
+      if (!author) return alert('Please enter an Author');
+
+      const isbn = document.getElementById('add-book-isbn').value;
+      if (!isbn) return alert('Please enter an ISBN');
+
+      let qty = document.getElementById('add-book-qty').value;
+      if (!qty) return alert('Please enter a Quantity');
+      qty = parseInt(qty);
+
+      const status = document.getElementById('add-book-status').value;
+
+      book = { title, author, isbn, qty, status };
+
       try {
         const response = await fetch(`${baseUrl}/librarian/books`, {
           method: 'POST',
@@ -400,6 +816,13 @@
         });
 
         const result = await response.json();
+        
+        closeModal('addBookModal');
+        if (!response.ok) {
+          document.getElementById("content").innerHTML = `<p>${result.error || 'Error occurred'}</p>`;
+          return;
+        }
+
         console.log(result);
         alert(result.message || 'Book added successfully!');
         fetchBooks();
@@ -474,15 +897,17 @@
       contentDiv.appendChild(ul);
     }
 
-    // Fetch borrowed books of a user
-    function getUserTransactionsPrompt() {
-      const userId = prompt("Enter the user ID:");
-      if (userId) {
-        fetchUserTransactions(userId);
-      }
+    function logout() {
+      localStorage.removeItem("token");
+      localStorage.removeItem("username");
+      localStorage.removeItem("role");
+      window.location.href = '/iit-bombay-intern-assignment-frontend/index.html'; // Redirect to the signup page
     }
 
-    async function fetchUserTransactions(userId) {
+    async function fetchUserTransactions() {
+      userId = document.getElementById('transaction-user-id').value;
+      if (!userId) return alert('Please enter a User ID.');
+
       try {
         const response = await fetch(`${baseUrl}/librarian/users/${userId}/history`, {
           headers: { Authorization: `Bearer ${token}` },
@@ -494,6 +919,7 @@
           document.getElementById("content").innerHTML = '<p>No Transactions found for this user.</p>';
         } else {
           renderTransction(transactions);
+          closeModal('userTransactionsModal');
         }
       } catch (error) {
         console.error('Error fetching user borrowed books:', error);
